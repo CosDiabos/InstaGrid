@@ -1,0 +1,183 @@
+body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+	background-color: #fafafa;
+	font-family: sans-serif;
+    font-stretch: 100%;
+    font-size: 1em;
+}
+
+a, a:hover, a:visited, a:active {
+	color: inherit;
+	text-decoration: none;
+}
+
+img {
+	width: 100%;
+	height: auto;
+}
+
+.msgbox {
+    width: 30%;
+    position: fixed;
+    top: 40%;
+    left: 40%;
+    text-align: center;
+    background-color: #f4f4f4;
+    border-radius: 3px;
+    font-size: .7em;
+    color: #414141;
+    padding: 10px 0px;
+    display: none;
+}
+
+.msgbox p {
+    margin: 0px;
+}
+
+.result {
+	display: none;
+}
+
+.zero_grid {
+    text-align: center;
+    font-size: 0.5em;
+    padding: 20px 0px;
+}
+
+.helper {
+    width: 70%;
+    margin: 0 auto;
+    padding: 20px 0px;
+    background-color: #f4f4f4;
+    color: #414141;
+}
+
+.helper form {
+    display: inline-block;
+}
+
+form input[type="file"] {
+	display: none;
+}
+
+label[for="img"], i {
+	color: #414141;
+}
+
+.addPosts:hover {
+	color: #414141;
+	text-decoration: none;
+}
+
+.feed, .profile {
+    width: 70%;
+    min-height: 30em;
+    margin: 0 auto;
+}
+
+.profile-pic {
+	float: left;
+	width: 28.6%;
+	padding: 2%;
+}
+
+.profile-pic img {
+	border-radius: 50%;
+}
+
+p.username {
+    font-size: 1.7em;
+    line-height: 18px;
+    font-weight: 200;
+}
+
+li.posts,li.followers,li.follows {
+
+}
+
+.info li {
+    display: inline-block;
+    margin-right: 60px;
+}
+
+.feed ul {
+    width: 100%;
+	list-style: none;
+    padding: 0px;
+}
+
+.feed ul li {
+    float: left;
+    width: 32.5%;
+    margin: 0 0.5% 0.5% 0.5%;
+    position: relative;
+    overflow: hidden;
+}
+
+.feed ul li .wrap {
+	height: 100%;
+}
+
+.feed ul li img {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+.feed ul li img:first-child {
+	position: relative;
+}
+
+.feed ul li:nth-child(3n) {
+	margin-right: 0;
+}
+.feed ul li:nth-child(-3n) {
+	margin-left: 0;
+}
+
+.addMoreImgs {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+    background-color: rgba(255,255,255,0.2);
+    z-index: 9999;
+}
+
+.addMoreImgs a:first-child {
+    margin-top: 38%;
+}
+
+.addMoreImgs a {
+	margin: 0;
+    display: block;
+    color: #f4f4f4;
+    font-size: 0.7em;
+    margin-bottom: 10px;
+}
+
+.addMoreImgs a i {
+	color: #f4f4f4;
+}
+
+/* Slider bullets */
+.imgbullets {
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    bottom: 4px;
+    z-index: 10;
+}
+
+.imgbullets span.bullet {
+    width: 15px;
+    height: 15px;
+    background-color: #eaeaea;
+    display: inline-block;
+    margin-right: 20px;
+    border-radius: 60px;
+    cursor: pointer;
+}
