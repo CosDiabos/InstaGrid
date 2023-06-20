@@ -26,8 +26,8 @@ var imagesPosts = [];
 
 var logged = true;
 var acc = {
-  user:"cosdiabos",
-  pass:"Tv3FJTyuOO7Wg6"
+  user:"username",
+  pass:"password"
 }
 
 app.use(express.json({limit:"1mb"}));

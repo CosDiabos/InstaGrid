@@ -1,8 +1,7 @@
-
 .DS_Store
-node_modules/*
-projects/*
+node_modules
+projects
 package-lock.json
-userDataDirPuppeter/*
-UI/public/uploads/*
-UI/dist/*
+userDataDirPuppeter
+UI/public/uploads
+UI/dist
