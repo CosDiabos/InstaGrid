@@ -6,6 +6,12 @@ InstaGrid is a post planning tool for Instagram. It was developed to be ran loca
 This app is divided in two parts, back-end and front-end. The front-end section is contained within the [UI/](UI/) folder and the back-end is contained in the repo root controlled by [index.js](index.js)
 
 
+
+https://github.com/psiico/InstaGrid/assets/14842802/023536fe-13d9-4a94-9658-cfaa542075c3
+
+
+
+
 ## How it works
 
 The app scrapes a profile directly from Instagram website (not through the official API). This scrapper retrieves the following: username, # posts, # followers, # following, bio, highlights, profile picture and the latest 6 posts. (Bear in mind that private accounts won't be able to be scrapped publicly, you will have to login)
