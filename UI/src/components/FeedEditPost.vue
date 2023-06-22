@@ -59,7 +59,6 @@ export default {
           cropDOM.style.display = ""
         }
         this.cropping = !this.cropping
-        console.log(this.cropping)
 
         const resizers = document.querySelectorAll('.crop' + ' .cropper');
         let original_width = 0;
@@ -81,8 +80,6 @@ export default {
             original_mouse_y = e.pageY;
             // cropDOM.removeEventListener('mousemove', this.resize)
             // cropDOM.addEventListener('mouseup', this.stopResize)
-            console.log("mouseDown!");
-            console.log(tst);
           });
           }
       break;
@@ -167,7 +164,6 @@ export default {
         }
       // this.previewClasses.length
         }
-        console.log(imgEdit);
         axios.post("/editImage", imgEdit).then((res) => {
           if (res.data == "OK")
           {
@@ -183,7 +179,6 @@ export default {
       default:
       return;  
       }
-      console.log(e.currentTarget.getAttribute('action'));
     },
     
     editPost() {
@@ -221,7 +216,6 @@ export default {
     },
     resize(e) {
       if (tst) {
-      console.log("original_width = %f, original_height = %f, original_x = %f, original_y = %f, original_mouse_x = %f, original_mouse_y = %f", original_width, original_height, original_x, original_y, original_mouse_x, original_mouse_y);
       // console.log(original_width, original_height, original_x, original_y, original_mouse_x, original_mouse_y);
       original_width = parseFloat(getComputedStyle(cropDOM, null).getPropertyValue('width').replace('px', ''));
       original_height = parseFloat(getComputedStyle(cropDOM, null).getPropertyValue('height').replace('px', ''));
@@ -233,8 +227,6 @@ export default {
       if (e.target.classList.contains('up')) {
         const width = original_width + (e.pageX - original_mouse_x)
         const height = original_height - (e.pageY - original_mouse_y)
-        console.log(width)
-        console.log(height)
         if (width > minimum_size) {
           cropDOM.style.width = width + 'px'
         }
@@ -278,7 +270,6 @@ export default {
     },
       stopResize() {
       if (tst) {
-        console.log("mouseUp")
         // cropDOM.removeEventListener('mousemove', this.resize)
         tst = false;
       }
@@ -295,7 +286,6 @@ export default {
 
     previewImageSrc() {
       // ${previewImage}?cache=${this.cacheKey}
-      console.log(this.rotationPreview);
 
       var src = this.previewImage + "?cache=" + this.cacheKey;
       if (this.rotationPreview != 0) {
@@ -340,7 +330,7 @@ export default {
 //       // ${previewImage}?cache=${this.cacheKey}
 //       console.log(this.rotationPreview);
 //       if (this.rotationPreview != 0) {
-//         axios.post("http://localhost:3000/prevImage/" + this.rotationPreview, {file:this.previewImage}).then((res) => {
+//         axios.post("/prevImage/" + this.rotationPreview, {file:this.previewImage}).then((res) => {
 //           console.log(res.data);
 //           return "mani"
 //             // return res.data;
@@ -361,14 +351,9 @@ export default {
 },
 watch: {
   refreshImgEditPost:function (newV,oldV) {
-    console.log('a')
-    console.log('New: %s Old: %s', newV,oldV)
     if (newV == true) {
-        console.log("Must refresh after file upload!")
         this.editObj.file = JSON.parse(JSON.stringify(this.profile.schedule[this.editIndex].file));
-        console.log("Updated!")
     } else {
-      console.log("false!")
     }
   }
 }
@@ -388,13 +373,13 @@ watch: {
        </div>
        <div class="w-full">
          <ul>
-           <li class="btn" v-if="this.edittingImageStatus === false" action="edit_start" @click="editImage">Edit Image</li>
-           <li v-if="this.edittingImageStatus == true" action="crop" @click="editImage">Crop</li>
-           <li v-if="this.edittingImageStatus == true" action="rotate-90" @click="editImage">Rotate -90º</li>
-           <li v-if="this.edittingImageStatus == true" action="rotate+90" @click="editImage">Rotate 90º</li>
-           <li v-if="this.edittingImageStatus == true" action="flip_v" @click="editImage">Flip V</li>
-           <li v-if="this.edittingImageStatus == true" action="flip_h" @click="editImage">Flip H</li>
-           <li class="btn" v-if="this.edittingImageStatus === true" action="edit_end" @click="editImage">Finish Editing</li>
+           <li class="inline-block mr-5 mb-3" v-if="this.edittingImageStatus === false" action="edit_start" @click="editImage"><button class="btn-primary">Edit Image</button></li>
+           <!-- <li class="inline-block mr-5  mb-3" v-if="this.edittingImageStatus == true" action="crop" @click="editImage"><button class="btn-primary">Crop</button></li> -->
+           <li class="inline-block mr-5  mb-3" v-if="this.edittingImageStatus == true" action="rotate-90" @click="editImage"><button class="btn-primary">Rotate -90º</button></li>
+           <li class="inline-block mr-5  mb-3" v-if="this.edittingImageStatus == true" action="rotate+90" @click="editImage"><button class="btn-primary">Rotate 90º</button></li>
+           <li class="inline-block mr-5 mb-3" v-if="this.edittingImageStatus == true" action="flip_v" @click="editImage"><button class="btn-primary">Flip V</button></li>
+           <li class="inline-block mr-5 mb-3" v-if="this.edittingImageStatus == true" action="flip_h" @click="editImage"><button class="btn-primary">Flip H</button></li>
+           <li class="inline-block mr-5 mb-3 " v-if="this.edittingImageStatus === true" action="edit_end" @click="editImage"><button class="btn-primary">Finish Editing</button></li>
          </ul>
        </div>
        <div class="img_container">

@@ -3,22 +3,29 @@ import axios from 'axios'
 import ProjectManager from './ProjectManager.vue'
 import HeaderHighlights from './HeaderHighlights.vue'
 import ConfirmationModal from './ConfirmationModal.vue'
+import { v4 as uuidv4 } from 'uuid';
 
 export default {
   name: 'headerprofile',
-  inject: ["profile"],
+  inject: ["profile", "msgBox"],
   emits: ["modalResult"],
   data() {
-    return {usernameCrawler:"cosdiabos"}
+    return {usernameCrawler:""}
   },
   components: { ProjectManager, HeaderHighlights, ConfirmationModal },
   methods: {
     fetchProfile(e) {
+    this.msgBox.type = "info"
+    this.msgBox.message = "Scrapping profile..."
+    this.msgBox.show = true;
     this.usernameCrawler = ""
-      // axios.get("http://localhost:3000/json/" + e.srcElement.value)
-      axios.get("http://localhost:3000/fetch/" + e.srcElement.value)
+      // axios.get("/json/" + e.srcElement.value)
+      axios.get("/fetch/" + e.srcElement.value)
       .then(r => {
         this.profile = r.data
+        this.profile.schedule ??=[];
+        this.profile.uuid = uuidv4()
+
       })
     this.usernameCrawler = e.srcElement.value
     },
@@ -27,23 +34,22 @@ export default {
     }
   },
   mounted() {
-      // console.log(this.profile);
     // const myCarouselEl = document.getElementById("carouselExampleControls");
     // const myCarousel = new Carousel(myCarouselEl);
     // myCarousel.cycle();
     // console.log("cycling....!");
-  },
-  update() {
-    console.log("This exists!!");
   }
 }
 </script>
 
 <template>
   <ConfirmationModal @modalResult="resultM" show="false"/>
+  <div class="absolute w-full max-w-screen-lg mx-auto text-center transition-opacity ease-in-out duration-1000 z-[2] text-md text-slate-800" :class="!this.msgBox.show ? 'opacity-0 hidden' : ''">
+    <div class="my-2 rounded p-3 cursor-pointer" title="Click to dismiss" @click="this.msgBox.show = !this.msgBox.show" :class="this.msgBox.type == 'success' ? 'bg-success-300' : this.msgBox.type == 'error' ? 'bg-danger-300 text-white' : 'bg-info-300' ">{{this.msgBox.message}}</div>
+  </div>
 <div class="flex">
     <div class="w-full py-4 px-4 mb-4 bg-gray-200">
-      Search for a profile <input type="text" name="username" placeholder="username" value="cosdiabos" @keyup.enter="fetchProfile" class="bg-transparent border-2 border-solid border-b-gray-300 hover:border-b-gray-300 focus:border-b-gray-400"> or <ProjectManager :profile-name="this.usernameCrawler" /> 
+      Search for a profile <input type="text" name="username" placeholder="username" value="" autocomplete="off" @keyup.enter="fetchProfile" class="bg-transparent border-2 border-solid border-b-gray-300 hover:border-b-gray-300 focus:border-b-gray-400"> or <ProjectManager :profile-name="this.usernameCrawler" /> 
     </div>
   </div>
 

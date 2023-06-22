@@ -30,7 +30,7 @@ const editObj = ref({
 
 export default {
   name: 'feedschedule',
-	inject: ["profile"],
+	inject: ["profile", "msgBox"],
   emits:['updateEdit'],
   setup(props, context) {
 
@@ -47,7 +47,6 @@ export default {
     if (myCarouselEl != null) {
       const myCarousel = new Carousel(myCarouselEl);
       myCarousel.cycle();
-      console.log("cycling....!");
     }
   },
   methods: {
@@ -86,7 +85,6 @@ export default {
             });
           } else {
             // Adds an image to already existing post
-            console.log("add to existing...")
             this.profile.schedule[res.data.index].file.push(res.data.files[i]);
             // FeedEditPost.reload();
             this.refreshEditPost = true;
@@ -94,9 +92,10 @@ export default {
         }
 
       }).catch((err) => {
-        console.log(err);
+        this.msgBox.type = "error"
+        this.msgBox.message = "There was a problem uploading your images. " + err.message
+        this.msgBox.show = true;
       })
-      // console.log(event.target.files);
     },
     openEdit(index) {
       if (isNaN(index)) {
@@ -119,9 +118,15 @@ export default {
         axios.post("/delImage", delEdit).then((res) => {
           if (res.data == "OK") {
             this.profile.schedule.splice(index, 1);
+            this.msgBox.type = "success"
+            this.msgBox.message = "Post deleted!"
+            this.msgBox.show = true;
           }
         }).catch(err => {
           //Error in ajax POST
+          this.msgBox.type = "error"
+          this.msgBox.message = "There was a problem deleting your post. " + err.message
+          this.msgBox.show = true;
 
         })
       }
@@ -130,12 +135,9 @@ export default {
       editObj.value.dialog = e;
       if (Object.keys(data).length > 0) {
         this.profile.schedule[editObj.value.index] = data
-        // console.log(this.profile.schedule[editObj.value.index])
-      console.log(this.profile.schedule);
       }
       const nowTime = +new Date()
       this.cacheKey = nowTime
-      // console.log(editObj.value);
     },
     triggerPostUpload(index) {
       this.postIndex = index
@@ -149,7 +151,6 @@ export default {
       // console.log(k)
     },
     passToPosted(index) {
-      console.log(index);
       this.profile.posting.unshift(this.profile.schedule[index]);
       this.profile.schedule.splice(index,1);
     },
@@ -163,44 +164,45 @@ export default {
     customExportFunc(all = false) {
       let indexesToExport = document.querySelectorAll("input[name='index']:checked");
       if (indexesToExport.length > 0) {
-        console.log("Items to export!!")
         let objExport = [];
         for (var i = 0; i < indexesToExport.length; i++) {
           objExport[i] = this.profile.schedule[indexesToExport.length-i-1];
           indexesToExport[i].checked = false
         }
-        console.log(objExport)
-        axios.post("http://localhost:3000/export", {files:objExport, uuid:this.profile.uuid}).then((res) => {
-          console.log(res.data)
-          console.log(res.data.zip)
+        this.msgBox.type = "info"
+        this.msgBox.message = "Exporting posts..."
+        this.msgBox.show = true;
+        axios.post("/export", {files:objExport, uuid:this.profile.uuid}).then((res) => {
           window.open(
             res.data.zip, "_blank");
         }).catch((err) => {
-        console.log(err);
+        this.msgBox.type = "error"
+        this.msgBox.message = "There was an error exporting your posts. " + err.message
+        this.msgBox.show = true;
         })
-      } else {
-        console.log("NONE!")
       }
-        this.customExport = !this.customExport
+      this.customExport = !this.customExport
     },
     allExportFunc() {
       let indexesToExport = document.querySelectorAll("input[name='index']");
       if (indexesToExport.length > 0) {
-        console.log("Items to export!!")
         let objExport = [];
         for (var i = 0; i < indexesToExport.length; i++) {
           objExport[i] = this.profile.schedule[indexesToExport.length-i-1];
           indexesToExport[i].checked = false
         }
-        axios.post("http://localhost:3000/export", {files:objExport, uuid:this.profile.uuid}).then((res) => {
+        this.msgBox.type = "info"
+        this.msgBox.message = "Exporting posts..."
+        this.msgBox.show = true;
+        axios.post("/export", {files:objExport, uuid:this.profile.uuid}).then((res) => {
           window.open(
             res.data.zip, "_blank");
         }).catch((err) => {
-        console.log(err);
+        this.msgBox.type = "error"
+        this.msgBox.message = "There was an error exporting your posts. " + err.message
+        this.msgBox.show = true;
         })
-      } else {
-        console.log("NONE!")
-      }
+      } 
     },
   }
 }
@@ -229,7 +231,7 @@ export default {
     </div>
 
       <ul class="leading-none">
-        <Draggable v-model="this.profile.schedule" item-key="file" :move="itemKey" handle=".handle">
+        <Draggable v-model="this.profile.schedule" item-key="file" handle=".handle">
           <template #item="{ element, index }">
             <li class="handle w-1/3 group inline-block px-[2px]" :key="element.id">
               <input type="checkbox" name="index" :value="index" :class="this.customExport ? '' : 'hidden'">

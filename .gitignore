@@ -4,3 +4,7 @@ package-lock.json
 userDataDirPuppeteer
 UI/public/uploads
 UI/dist
+.DS_Store
+projects
+
+projects/.DS_Store

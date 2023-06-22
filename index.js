@@ -1,16 +1,17 @@
 const express = require('express')
 const cors = require('cors')
-const multer = require('multer')
 const app = express()
 const puppeteer = require('puppeteer');
 const readline = require("readline");
 const fs = require('fs');
 const path = require('path');
-const sharp = require('sharp');
 const body_parser = require('body-parser');
 const archiver = require('archiver');
 
-sharp.cache(false);
+var routeGET = require('./routes/get')
+var routePOST = require('./routes/post')
+
+
 
 var profile = {
   username: "",
@@ -24,295 +25,22 @@ var profile = {
 
 var imagesPosts = [];
 
-var logged = true;
+global.logged = true;
 var acc = {
-  user:"username",
-  pass:"password"
+  user:"IG_username",
+  pass:"IG_pw"
 }
 
 app.use(express.json({limit:"1mb"}));
 app.use(express.urlencoded({ limit: "1mb", extended: true }));
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      console.log(req.body)
-      try {
-        if (!fs.existsSync(__dirname + '/UI/dist/uploads/' + req.body.uuid)) {
-          fs.mkdirSync(__dirname + '/UI/dist/uploads/' + req.body.uuid);
-        }
-      }
-      catch (e) {
 
-      } 
-      cb(null, __dirname + '/UI/dist/uploads/' + req.body.uuid)
-    },
-    filename: function (req, file, cb) {
-            cb(null, file.fieldname + '-' + Date.now() + file.originalname.match(/\..*$/)[0])
-    }
-});
-
-const multi_upload = multer({
-    storage,
-    limits: { fileSize: 1 * 1024 * 1024 }, // 1MB
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
-            cb(null, true);
-        } else {
-            cb(null, false);
-            const err = new Error('Only .png, .jpg and .jpeg format allowed!')
-            err.name = 'ExtensionError'
-            return cb(err);
-        }
-    },
-}).array('img', 6)
-
-app.post('/upload', (req, res) => {
-multi_upload(req, res, function (err) {
-        if (err instanceof multer.MulterError) {
-            // A Multer error occurred when uploading.
-            res.status(500).send({ error: { message: `Multer uploading error: ${err.message}` } });
-            return;
-        } else if (err) {
-            // An unknown error occurred when uploading.
-            if (err.name == 'ExtensionError') {
-                res.status(413).send({ error: { message: err.message } });
-            } else {
-                res.status(500).send({ error: { message: `unknown uploading error: ${err.message}` } });
-            }
-            return;
-        }
-        // Everything went fine.
-        // show file `req.files`
-        // show body `req.body`
-        let rpl = {
-          index:req.body.index,
-          files:[]
-        };
-        for (var i = 0; i < req.files.length; i++) {
-          rpl.files.push({
-            file:req.files[i].filename 
-          })
-        }
-        console.log(rpl)
-        res.status(200).json(rpl);
-    })
-});
-
-app.post('/editImage', (req, res) => {
-    new Promise(async (resolve, reject) => {
-        // cb(null, __dirname + '/UI/dist/')
-        // try {
-        //     .rotate(33, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        //     .toFile("sammy-rotated.png");
-        // } catch (error) {
-        //   console.log(error);
-        // }
-      try {
-        console.log(req.body);
-        console.log("path to img:" + __dirname + '/UI/dist/' + req.body.file);
-          const EditingImage = await sharp(__dirname + '/UI/dist/' + req.body.file)
-          if (req.body.flip) {
-            await EditingImage.flip();
-            console.log("flipped!")
-          }
-          if (req.body.flop) {
-            await EditingImage.flop();
-            console.log("flopped!")
-          }
-          if (req.body.rotation != 0) {
-            await EditingImage.rotate(req.body.rotation);
-            console.log("rotated!")
-          }
-          EditingImage.toBuffer((err, buffer) => {
-            if (err) {
-                console.error(err);
-                res.status(400).json(JSON.stringify(err));
-            }
-            else {
-                // console.log(sh);
-              fs.writeFile(__dirname + '/UI/dist/' + req.body.file, buffer, function(e) {
-                res.status(200).send("OK");
-              })
-            }
-          });
-        // console.log(res)
-        // res.status(200).json();
-      return resolve(req)
-    } catch (e) {
-      console.log("/editImage Error", e);
-    }
-
-    });
-});
-
-app.post('/delImage', (req, res) => {
-  // cb(null, __dirname + '/UI/dist/')
-  try {
-    fs.unlinkSync(__dirname + '/UI/dist/' + req.body.file)
-    res.status(200).send("OK");
-  } catch (error) {
-    console.log("/delImage Error", error);
-    res.status(400).send(error);
-  }
-});
-
-
-app.post('/export', (req, res) => {
-  // create a file to stream archive data to.
-  let zipFile = 'instagrid-' + Date.now() + '.zip';
-  const output = fs.createWriteStream(__dirname + '/UI/dist/' + zipFile);
-  const archive = archiver('zip', {
-    zlib: { level: 9 } // Sets the compression level.
-  });
-  archive.on('error', function(err) {
-    console.log("ERROR ZIP:", err);
-  });
-  let files = req.body.files;
-  archive.pipe(output);
-  for (var i = 0; i < req.body.files.length; i++) {
-    req.body.files[i]
-    let folder = false;
-    for (var ii = 0; ii < req.body.files[i].file.length; ii++) {
-      if (folder == false) {
-        archive.append('', { name: i+'/.keep' });
-        folder = true;
-      }
-      archive.file(__dirname + '/UI/dist/uploads/' + req.body.uuid + '/'+ req.body.files[i].file[ii].file, { name: i + "/" + ii+"_"+req.body.files[i].file[ii].file });
-      
-    }
-    /* Prevent undefined in 'info.txt' if any of these fields
-    aren't sent by the front-end */
-    req.body.files[i].caption ??="";
-    req.body.files[i].location ??="";
-    req.body.files[i].date ??="";
-    req.body.files[i].notes ??="";
-
-let infoFile = `
-Caption:
-${req.body.files[i].caption}
-Location:
-${req.body.files[i].location}
-Date:
-${req.body.files[i].date}
-Notes:
-${req.body.files[i].notes}
-`;
-    archive.append(infoFile, { name: i+'/info.txt' });
-  }
-  let readMeFile = `
-Hello! :) This is your exported feed. The posts were exported from the bottom to the top of the scheduled feed.
-Each post was splitted into their own folder by posting order (0 = first, 1 = second, and so forth).
-Inside each folder there is a info.txt file which contains the post content (Caption, Location, etc.) in order to publish it.`
-  archive.append(readMeFile, { name: 'ReadMe.txt' });
-  archive.finalize()
-  res.status(200).json({zip: zipFile})
-});
-
-app.post('/prevImage/:deg', (req, res) => {
-  // cb(null, __dirname + '/UI/dist/')
-  if (isNaN(req.params.deg)) {
-    res.status(400).send("");
-    return;
-  } else {
-    deg = req.params.deg;
-    new Promise(async (resolve, reject) => {
-      try {
-          const EditingImage = await sharp(__dirname + '/UI/dist/' + req.body.file)
-          await EditingImage.rotate(Number(deg));
-          EditingImage.toBuffer((err, buffer) => {
-            if (err) {
-                console.error(err);
-                res.status(400).json(JSON.stringify(err));
-            }
-            else {
-                res.status(200).send("data:image/jpeg;base64," + buffer.toString("base64"));
-            }
-            });
-      } catch (e) {
-        console.log("/prevImage Error", e);
-        res.status(400).json(e);
-
-      }
-    });
-  }
-});
-
-app.get('/getProjects', (req, res) => {
-  // cb(null, __dirname + '/UI/dist/')
-  fs.readdir(__dirname + '/projects/', (err, files) => {
-    var projs = []
-    files.forEach(file => {
-      if (path.extname(file).toLowerCase() == ".json") {
-        projs.push(file);
-      }
-    });
-    res.status(200).json(projs);
-  });
-});
-
-app.post('/saveProject', (req, res) => {
-  // cb(null, __dirname + '/UI/dist/')
-  fs.writeFile(__dirname + '/projects/' + req.body.name + ".json", req.body.profile, err => {
-    if (err) {
-      console.error(err);
-      res.status(400).json(err);
-    }
-    // file written successfully
-    res.status(200).send("OK");
-  });
-});
-
-app.get('/loadProject/:name', (req, res) => {
-  // cb(null, __dirname + '/UI/dist/')
-  fs.readFile(__dirname + '/projects/' + req.params.name + ".json", 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(400).json(err);
-    }
-    // file written successfully
-    res.status(200).json(JSON.parse(data));
-  });
-});
 
 app.use('/', express.static(__dirname + '/ui/dist'));
 
-var handle = "";
+app.use('/', routeGET);
+app.use('/', routePOST);
 
-app.get('/fetch/:handle', (req, res) => {
-    
-    new Promise(async (resolve, reject) => {
-        try {
-          if (logged == false) {
-            handle = req.params.handle;
-            login();
-            await res.json("");
-          }  else {
-            var p = await fetch(req.params.handle);
-            await res.json(p);
-            fs.writeFileSync(__dirname + '/imagesPosts.json', JSON.stringify(imagesPosts));
-            // console.log(imagesPosts);
-          }
-          return resolve(req);
-    } catch(e) {
-      console.log("Error! " + e);
-      return reject(e);
-    }
-  });
-})
-
-app.get('/data/:handle', (req, res) => {
-    
-    new Promise(async (resolve, reject) => {
-        try {
-            var p = await getData(req.params.handle);
-            await res.json(p);
-          return resolve(req);
-    } catch(e) {
-      console.log("Error! " + e);
-      return reject(e);
-    }
-  });
-})
 
 function login() {
   return new Promise(async (resolve, reject) => {
@@ -395,7 +123,7 @@ async function post2FA(token) {
   await page.click('button');
   await page.waitForNavigation({waitUntil: 'domcontentloaded'}); // ??
   await console.log("Valid 2FA!");
-  logged = true;
+  global.logged = true;
   fetch(handle);
   } catch (e) {
     console.log(e);
@@ -404,7 +132,7 @@ async function post2FA(token) {
 
 }
 
-function fetch (h) {
+global.fetch = function fetch (h) {
   console.log("Fetching profile: " + h);
     return new Promise(async (resolve, reject) => {
         try {
@@ -434,7 +162,7 @@ function fetch (h) {
             const followingEle = await page.waitForSelector('section ul li:nth-child(3) span');
             profile.following = await followingEle.evaluate(el => el.textContent, followingEle);
             
-            const nameEle = await page.waitForSelector('section > div._aa_c > div.x9f619.xjbqb8w.x78zum5.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.x1uhb9sk.x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x1qjc9v5.x1oa3qoh.x1nhvcw1 > span._aacl._aaco._aacw._aacx._aad7._aade');
+            const nameEle = await page.waitForSelector('section > div._aa_c > div.x9f619.xjbqb8w.x78zum5.x168nmei.x13lgxp2.x5pf9jr.xo71vjh.x1uhb9sk.x1plvlek.xryxfnj.x1c4vz4f.x2lah0s.x1q0g3np.xqjyukv.x1qjc9v5.x1oa3qoh.x1nhvcw1 > span');
             profile.name = await nameEle.evaluate(el => el.textContent, nameEle);
 
             const bioEle = await page.waitForSelector('section h1');
@@ -528,7 +256,7 @@ const ask2FAToken = () => new Promise((resolve) => rl.question("2FA Token: ", re
 
 var browser, page;
 new Promise(async (resolve, reject) => {
-browser = await puppeteer.launch({headless: false, userDataDir:"./userDataDirPuppeteer"});
+browser = await puppeteer.launch({headless: true, userDataDir:"./userDataDirPuppeteer"});
 page = await browser.newPage();
 await page.goto('http://localhost:3000');
 // page.setDefaultNavigationTimeout(0);
@@ -563,7 +291,7 @@ page.on('response', async (request) => {
 });
 
 process.on('SIGINT', async function() {
-    console.log("Caught interrupt signal");
+    console.log("Caught interrupt signal. Quitting...");
     try {
      await browser.close()
     } catch (e) {

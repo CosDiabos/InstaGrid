@@ -6,90 +6,30 @@ import { ref, provide } from 'vue'
 import { v4 as uuidv4 } from 'uuid';
 
 var profile = {
-  uuid:"test",
+  uuid:uuidv4(),
   username: "",
   posts: "0",
   followers:"0",
   following: "0",
   PP: "",
-  name:"Jess",
-  bio:"Club de música electrónica para melómanxs con equipo de sonido L-Acoustics.",
+  name:"",
+  bio:"",
   highlights: [],
   posting:[
-    {
-      file:[
-        {
-          file:"uploads/test.png"
-        }
-      ]
-    },
-    {
-      file:[
-        {
-          file:"uploads/test.png"
-        }
-      ]
-    },
-    {
-      file:[
-        {
-          file:"uploads/p1.jpg"
-        }
-      ]
-    },
-    {
-      file:[
-        {
-          file:"uploads/p2.jpg"
-        }
-      ]
-    },
-    {
-      file:[
-        {
-          file:"uploads/p3.jpg"
-        }
-      ]
-    }
+    
   ],
   schedule:[
-    {
-      file:[
-        {
-          file:"img-1683623677319.png"
-        }
-      ],
-      caption:"Caption2",
-      location:"Location",
-      date: "2023-05-09T00:00"
-    },
-    {
-      file: [
-        {
-          file:"img-1683796776126.04.33.png"
-        },
-        {
-          file:"img-1683796776126.04.34.jpg"
-        }
-    ],
-      caption:"",
-      location:"",
-      date: ""
-    },
-    {
-      file: [
-        {
-          file:"img-1684229632482.35.37.png"
-        }
-    ],
-      caption:"a",
-      location:"",
-      date: ""
-    }
+    
     ]
 };
 
+var msgBox = {
+  show:false,
+  type:"error",
+  message:""
+}
 const prof = ref(profile)
+const statusBar = ref(msgBox)
 // provide('profile', prof);
 
   export default {
@@ -100,7 +40,8 @@ const prof = ref(profile)
     FeedSchedule
   },
   provide: {
-    profile: prof
+    profile: prof,
+    msgBox: statusBar
   },
   methods: {
       
