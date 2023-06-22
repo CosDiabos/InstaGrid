@@ -3,6 +3,7 @@ node_modules
 package-lock.json
 userDataDirPuppeteer
 UI/dist
-.DS_Store
-projects/*
+UI/public/.DS_Store
+UI/public/uploads/.DS_Store
+projects/*.json
 projects/.DS_Store
